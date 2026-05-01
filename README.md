@@ -4,6 +4,8 @@ Raindrop.io Plugin for Obsidian shows saved Raindrop.io bookmarks inside notes a
 
 The plugin uses a Raindrop.io access token and the official Raindrop.io REST API. OAuth is planned for a later release.
 
+![Screenshot](./.github/assets/Screenshot.png)
+
 ## Features
 
 - **Raindrop.io explorer**: Browse saved bookmarks from the configured collection in a side pane.
