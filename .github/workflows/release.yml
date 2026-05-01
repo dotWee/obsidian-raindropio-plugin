@@ -25,6 +25,9 @@ jobs:
       - name: Build plugin
         run: npm run build
 
+      - name: Test plugin
+        run: npm test
+
       - name: Lint plugin
         run: npm run lint
 

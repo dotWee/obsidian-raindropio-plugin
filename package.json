@@ -18,7 +18,9 @@
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"test": "jest",
+		"test:watch": "jest --watch"
 	},
 	"keywords": [
 		"obsidian",
@@ -27,15 +29,19 @@
 		"bookmarks"
 	],
 	"devDependencies": {
+		"@eslint/js": "9.30.1",
+		"@types/jest": "^30.0.0",
 		"@types/node": "^16.11.6",
 		"esbuild": "0.25.5",
 		"eslint-plugin-obsidianmd": "0.1.9",
 		"globals": "14.0.0",
+		"jest": "^30.3.0",
+		"jest-environment-jsdom": "^30.3.0",
+		"jiti": "2.6.1",
+		"ts-jest": "^29.4.9",
 		"tslib": "2.4.0",
 		"typescript": "^5.8.3",
-		"typescript-eslint": "8.35.1",
-		"@eslint/js": "9.30.1",
-		"jiti": "2.6.1"
+		"typescript-eslint": "8.35.1"
 	},
 	"dependencies": {
 		"obsidian": "latest"

@@ -3,6 +3,12 @@ import obsidianmd from "eslint-plugin-obsidianmd";
 import globals from "globals";
 import { globalIgnores } from "eslint/config";
 
+type EslintConfig = Parameters<typeof tseslint.config>[number];
+
+const obsidianRecommendedConfigList = [
+	...((obsidianmd.configs?.recommended ?? []) as Iterable<EslintConfig>),
+];
+
 export default tseslint.config(
 	{
 		languageOptions: {
@@ -21,7 +27,15 @@ export default tseslint.config(
 			},
 		},
 	},
-	...obsidianmd.configs.recommended,
+	{
+		files: ["tests/**/*.ts"],
+		languageOptions: {
+			globals: {
+				...globals.jest,
+			},
+		},
+	},
+	...obsidianRecommendedConfigList,
 	globalIgnores([
 		"node_modules",
 		"dist",
