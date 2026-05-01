@@ -1,8 +1,112 @@
-/*
+.raindrop-results {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.raindrop-results-title,
+.raindrop-side-header h3 {
+	margin: 0;
+}
 
-If your plugin does not need CSS, delete this file.
+.raindrop-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
 
-*/
+.raindrop-item {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	padding: 0.75rem;
+	background: var(--background-primary);
+}
+
+.raindrop-item-title {
+	display: inline-block;
+	font-weight: var(--font-semibold);
+	margin-bottom: 0.25rem;
+}
+
+.raindrop-item-meta,
+.raindrop-item-excerpt,
+.raindrop-status,
+.raindrop-warning {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.raindrop-item-excerpt {
+	margin-top: 0.35rem;
+}
+
+.raindrop-item-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	margin-top: 0.5rem;
+}
+
+.raindrop-item-tag {
+	border-radius: 999px;
+	background: var(--background-secondary);
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	padding: 0.1rem 0.45rem;
+}
+
+.raindrop-status,
+.raindrop-warnings {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	padding: 0.75rem;
+}
+
+.raindrop-status-error,
+.raindrop-warning {
+	color: var(--text-error);
+}
+
+.raindrop-side-view {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 1rem;
+}
+
+.raindrop-side-header {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.raindrop-explorer-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.raindrop-explorer-search,
+.raindrop-explorer-actions {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.raindrop-explorer-search input {
+	flex: 1;
+	min-width: 0;
+}
+
+.raindrop-explorer-context {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.raindrop-side-content {
+	min-height: 4rem;
+}
+
+.raindrop-load-more {
+	align-self: stretch;
+}

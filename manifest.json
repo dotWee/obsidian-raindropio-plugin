@@ -1,11 +1,9 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "raindrop-io-plugin",
+	"name": "Raindrop.io Plugin for Obsidian",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Browse Raindrop.io links in Obsidian with note-aware search filters.",
+	"author": "Lukas '@dotWee' Wolfsteiner <lukas@wolfsteiner-media.de>",
 	"isDesktopOnly": false
 }

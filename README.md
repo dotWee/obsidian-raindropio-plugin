@@ -1,90 +1,143 @@
-# Obsidian Sample Plugin
+# Raindrop.io Plugin for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Raindrop.io Plugin for Obsidian shows saved Raindrop.io bookmarks inside notes and in a note-aware explorer side pane.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+The plugin uses a Raindrop.io access token and the official Raindrop.io REST API. OAuth is planned for a later release.
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## Features
 
-## First time developing plugins?
+- **Raindrop.io explorer**: Browse saved bookmarks from the configured collection in a side pane.
+- **Note-aware filtering**: Let the explorer follow the active note by turning note tags and external links into a Raindrop.io search query.
+- **Manual search**: Search Raindrop.io directly with keywords, `#tag` filters, exact phrases, or operators such as `type:article`, `notag:true`, and `created:2024-01`.
+- **Note blocks**: Render saved Raindrop.io links inline from fenced `raindrop` code blocks.
+- **Configurable tag clicks**: Choose whether tags on rendered Raindrop.io items search Obsidian notes, filter the explorer, or do nothing.
+- **Native Obsidian UI**: Uses Obsidian commands, a ribbon icon, theme-friendly styling, and no hidden telemetry.
 
-Quick starting guide for new plugin devs:
+## Setup
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+1. Create or copy a Raindrop.io access token.
+2. Open **Settings -> Community plugins -> Raindrop.io Plugin for Obsidian**.
+3. Paste the token into **Access token**.
+4. Use **Open explorer** from the command palette or ribbon icon.
+5. Optionally add a `raindrop` block to a note for inline results.
 
-## Releasing new releases
+The access token is stored in Obsidian plugin data and sent only to the Raindrop.io REST API.
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+## Explorer
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+The side pane opens as **Raindrop.io explorer**. It can browse all saved links from the configured collection, run manual searches, and load more paginated results.
 
-## Adding your plugin to the community plugin list
+Controls:
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+- **Search**: Runs the query in the search field against Raindrop.io.
+- **Use note filter**: Rebuilds the query from the active markdown note.
+- **Browse all**: Clears the query and shows the configured collection.
+- **Refresh**: Reloads the current explorer state.
+- **Load more**: Requests the next page of results when more are available.
 
-## How to use
+When the explorer follows a note, it uses:
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+- Obsidian tags from the active note as Raindrop.io tag filters, for example `#project`.
+- External `http` and `https` links as exact phrase searches.
+- `match:OR` when multiple note-derived filters are present, so a bookmark can match any note tag or link.
 
-## Manually installing the plugin
+Opening and interacting with the explorer preserves the last active markdown note as context, so the note filter remains stable while you browse.
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+## Note blocks
 
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+Add a fenced code block to any note:
 
-## Funding URL
+````markdown
+```raindrop
+collection: 0
+tag: project-x
+search: important
+sort: -created
+limit: 20
+```
+````
 
-You can include funding URLs where people who use your plugin can financially support it.
+Options:
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+- `collection`: Raindrop.io collection ID. Use `0` for all collections. Defaults to **Default collection**.
+- `tag`: Raindrop.io tag to include in the search. Multi-word tags are quoted automatically, for example `#"coffee beans"`.
+- `search`: Raindrop.io search query. This is passed through to Raindrop.io.
+- `sort`: Raindrop.io sort value, for example `-created`. Defaults to **Default sort**.
+- `limit`: Number of links to request, clamped between 1 and 100. Defaults to **Default limit**.
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+You can combine `tag` and `search`; the plugin joins them into one Raindrop.io query.
+
+## Settings
+
+- **Access token**: Token used for Raindrop.io API requests.
+- **Default collection**: Collection ID used by the explorer and note blocks unless a block overrides it. Use `0` for all collections.
+- **Default limit**: Number of links requested per page or block render. Values are clamped between 1 and 100.
+- **Default sort**: Sort value passed to Raindrop.io, such as `-created`.
+- **Tag click behavior**: Controls clicks on tags shown on Raindrop.io items.
+
+Tag click behavior options:
+
+- **Search notes for the tag**: Opens Obsidian search for the clicked tag.
+- **Filter explorer by the tag**: Opens the explorer and applies the clicked tag as a Raindrop.io filter.
+- **Do nothing**: Leaves tag clicks inactive.
+
+## Commands
+
+- **Open explorer**: Opens the Raindrop.io explorer side pane.
+- **Refresh explorer**: Reloads open explorer panes.
+
+## Search syntax
+
+The plugin passes search text through to Raindrop.io. Useful examples:
+
+- `#project-x`: Bookmarks tagged `project-x`.
+- `#"coffee beans"`: Bookmarks with a multi-word tag.
+- `"exact phrase"`: Exact phrase match.
+- `type:article`: Article bookmarks.
+- `notag:true`: Bookmarks without tags.
+- `created:2024-01`: Bookmarks created in January 2024.
+- `#work #research match:OR`: Bookmarks matching either tag.
+
+## Privacy and network access
+
+- The plugin only makes network requests to `https://api.raindrop.io`.
+- The access token is stored locally in Obsidian plugin data.
+- Note-aware filtering sends the generated Raindrop.io search query to Raindrop.io. If the active note contains external links, those URLs can be included in the query.
+- The plugin does not collect analytics or use hidden telemetry.
+
+## Release files
+
+Obsidian release assets are built at the repository root:
+
+- `main.js`
+- `manifest.json`
+- `styles.css`
+
+Do not commit generated `main.js`; attach it to GitHub releases together with `manifest.json` and `styles.css`.
+
+## Development
+
+Install dependencies and build the plugin:
+
+```bash
+npm install
+npm run build
 ```
 
-If you have multiple URLs, you can also do:
+For watch mode:
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+```bash
+npm run dev
 ```
 
-## API Documentation
+Quality checks:
 
-See https://docs.obsidian.md
+```bash
+npm run lint
+```
+
+## License
+
+Copyright (C) 2026 Lukas '@dotWee' Wolfsteiner <lukas@wolfsteiner.media>
+
+Licensed under the _[DO WHAT THE FUCK YOU WANT TO BUT IT'S NOT MY FAULT PUBLIC LICENSE](LICENSE)_.

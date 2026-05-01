@@ -1,99 +1,231 @@
-import {App, Editor, MarkdownView, Modal, Notice, Plugin} from 'obsidian';
-import {DEFAULT_SETTINGS, MyPluginSettings, SampleSettingTab} from "./settings";
+import { MarkdownView, Notice, Plugin, TFile } from "obsidian";
+import { parseRaindropBlock } from "./block-parser";
+import { RAINDROP_CODE_BLOCK, RAINDROP_VIEW_TYPE } from "./constants";
+import {
+	RAINDROP_FAVICON_ICON_ID,
+	registerRaindropIcons,
+	unregisterRaindropIcons,
+} from "./icons";
+import { RaindropApi } from "./raindrop-api";
+import { buildRaindropSearchQuery, formatRaindropTagFilter } from "./raindrop-search";
+import { RaindropSideView } from "./raindrop-view";
+import { renderRaindropItems, renderRaindropStatus } from "./renderer";
+import { DEFAULT_SETTINGS, isRaindropTagClickBehavior, RaindropSettingTab, RaindropViewSettings } from "./settings";
 
-// Remember to rename these classes and interfaces!
-
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
-
-	async onload() {
-		await this.loadSettings();
-
-		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('dice', 'Sample', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status bar text');
-
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-modal-simple',
-			name: 'Open modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'replace-selected',
-			name: 'Replace selected content',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				editor.replaceSelection('Sample editor command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-modal-complex',
-			name: 'Open modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-				return false;
-			}
-		});
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			new Notice("Click");
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-
-	}
-
-	onunload() {
-	}
-
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<MyPluginSettings>);
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
+interface GlobalSearchPluginInstance {
+	openGlobalSearch?: (query?: string) => void;
+	setQuery?: (query: string) => void;
+	setGlobalQuery?: (query: string) => void;
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
+export default class RaindropViewPlugin extends Plugin {
+	settings: RaindropViewSettings;
+	activeMarkdownFile: TFile | null = null;
+	private refreshTimeoutId: number | null = null;
+	private readonly refreshDebounceMs = 200;
+
+	async onload(): Promise<void> {
+		await this.loadSettings();
+		this.captureActiveMarkdownFile();
+		registerRaindropIcons();
+
+		this.registerView(RAINDROP_VIEW_TYPE, (leaf) => new RaindropSideView(leaf, this));
+
+		this.registerMarkdownCodeBlockProcessor(RAINDROP_CODE_BLOCK, async (source, el, ctx) => {
+			await this.renderRaindropSource(source, el, undefined, ctx.sourcePath);
+		});
+
+		this.addRibbonIcon(RAINDROP_FAVICON_ICON_ID, "Open explorer", () => {
+			void this.openRaindropView();
+		});
+
+		this.addCommand({
+			id: "open-raindrop-view",
+			name: "Open explorer",
+			callback: () => {
+				void this.openRaindropView();
+			},
+		});
+
+		this.addCommand({
+			id: "refresh-raindrop-view",
+			name: "Refresh explorer",
+			callback: () => {
+				void this.refreshRaindropViews();
+			},
+		});
+
+		this.addSettingTab(new RaindropSettingTab(this.app, this));
+
+		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", () => {
+				const didChange = this.captureActiveMarkdownFile();
+				if (didChange) {
+					this.scheduleRefreshRaindropViews();
+				}
+			}),
+		);
+
+		this.registerEvent(
+			this.app.vault.on("modify", (file) => {
+				if (file === this.activeMarkdownFile) {
+					this.scheduleRefreshRaindropViews();
+				}
+			}),
+		);
 	}
 
-	onOpen() {
-		let {contentEl} = this;
-		contentEl.setText('Woah!');
+	onunload(): void {
+		if (this.refreshTimeoutId !== null) {
+			window.clearTimeout(this.refreshTimeoutId);
+			this.refreshTimeoutId = null;
+		}
+		unregisterRaindropIcons();
 	}
 
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
+	async loadSettings(): Promise<void> {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, (await this.loadData()) as Partial<RaindropViewSettings>);
+		this.settings.defaultLimit = Math.max(1, Math.min(100, Math.floor(this.settings.defaultLimit)));
+		if (!isRaindropTagClickBehavior(this.settings.tagClickBehavior)) {
+			this.settings.tagClickBehavior = DEFAULT_SETTINGS.tagClickBehavior;
+		}
+	}
+
+	async saveSettings(): Promise<void> {
+		await this.saveData(this.settings);
+	}
+
+	async openRaindropView(searchQuery?: string, context?: string): Promise<void> {
+		this.captureActiveMarkdownFile();
+
+		const existingLeaf = this.app.workspace.getLeavesOfType(RAINDROP_VIEW_TYPE)[0];
+		const leaf = existingLeaf ?? this.app.workspace.getRightLeaf(false);
+		if (!leaf) {
+			new Notice("Could not open explorer.");
+			return;
+		}
+
+		await leaf.setViewState({ type: RAINDROP_VIEW_TYPE, active: true });
+		await this.app.workspace.revealLeaf(leaf);
+		if (searchQuery !== undefined && leaf.view instanceof RaindropSideView) {
+			await leaf.view.applySearchQuery(searchQuery, context);
+			return;
+		}
+
+		await this.refreshRaindropViews(true);
+	}
+
+	async refreshRaindropViews(force = false): Promise<void> {
+		const refreshes = this.app.workspace
+			.getLeavesOfType(RAINDROP_VIEW_TYPE)
+			.map((leaf) => leaf.view)
+			.filter((view): view is RaindropSideView => view instanceof RaindropSideView)
+			.map((view) => view.refresh(force));
+
+		await Promise.all(refreshes);
+	}
+
+	async renderRaindropSource(source: string, container: HTMLElement, title?: string, sourcePath?: string): Promise<void> {
+		renderRaindropStatus(container, "Loading Raindrop.io links...", "loading");
+
+		try {
+			const parsed = parseRaindropBlock(source);
+			const api = new RaindropApi(this.settings.accessToken);
+			if (!api.isConfigured) {
+				renderRaindropStatus(container, "Add a Raindrop.io access token in plugin settings.", "info");
+				return;
+			}
+
+			const limit = parsed.options.limit ?? this.settings.defaultLimit;
+			const items = await api.listRaindrops({
+				collectionId: parsed.options.collectionId ?? this.settings.defaultCollectionId,
+				search: buildRaindropSearchQuery({
+					search: parsed.options.search,
+					tags: parsed.options.tag ? [parsed.options.tag] : [],
+				}),
+				sort: (parsed.options.sort ?? this.settings.defaultSort) || undefined,
+				perpage: limit,
+			});
+
+			renderRaindropItems(container, items, {
+				title,
+				warnings: parsed.warnings,
+				onTagClick: (tag) => {
+					void this.handleRaindropTagClick(tag, sourcePath);
+				},
+			});
+		} catch (error) {
+			const message = error instanceof Error ? error.message : "Could not load Raindrop.io links.";
+			renderRaindropStatus(container, message, "error");
+		}
+	}
+
+	private captureActiveMarkdownFile(): boolean {
+		const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		const nextFile = markdownView?.file;
+		if (!nextFile) return false;
+
+		const currentPath = this.activeMarkdownFile?.path ?? "";
+		const nextPath = nextFile.path;
+		this.activeMarkdownFile = nextFile;
+		return currentPath !== nextPath;
+	}
+
+	private scheduleRefreshRaindropViews(): void {
+		if (this.refreshTimeoutId !== null) {
+			window.clearTimeout(this.refreshTimeoutId);
+		}
+
+		this.refreshTimeoutId = window.setTimeout(() => {
+			this.refreshTimeoutId = null;
+			void this.refreshRaindropViews();
+		}, this.refreshDebounceMs);
+	}
+
+	async handleRaindropTagClick(tag: string, sourcePath?: string): Promise<void> {
+		switch (this.settings.tagClickBehavior) {
+			case "obsidian-search":
+				await this.openObsidianTag(tag, sourcePath);
+				return;
+			case "raindrop-search": {
+				const tagFilter = formatRaindropTagFilter(tag);
+				if (!tagFilter) return;
+				await this.openRaindropView(tagFilter, `Filtering Raindrop.io by ${tagFilter}.`);
+				return;
+			}
+			case "none":
+				return;
+		}
+	}
+
+	async openObsidianTag(tag: string, sourcePath?: string): Promise<void> {
+		const normalized = tag.replace(/^#/, "").trim();
+		if (!normalized) return;
+
+		const searchQuery = `tag:#${normalized}`;
+		const appWithInternals = this.app as typeof this.app & {
+			internalPlugins?: {
+				plugins?: Record<string, { instance?: unknown }>;
+			};
+		};
+		const globalSearch = appWithInternals.internalPlugins?.plugins?.["global-search"]?.instance as
+			| GlobalSearchPluginInstance
+			| undefined;
+
+		// Prefer native global search behavior for tag clicks from any view.
+		if (globalSearch?.openGlobalSearch) {
+			globalSearch.openGlobalSearch(searchQuery);
+			return;
+		}
+		if (globalSearch?.setGlobalQuery) {
+			globalSearch.setGlobalQuery(searchQuery);
+			return;
+		}
+		if (globalSearch?.setQuery) {
+			globalSearch.setQuery(searchQuery);
+			return;
+		}
+
+		await this.app.workspace.openLinkText(`#${normalized}`, sourcePath ?? this.activeMarkdownFile?.path ?? "", false);
 	}
 }
