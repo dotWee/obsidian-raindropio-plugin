@@ -1,6 +1,6 @@
-# Raindrop.io Plugin for Obsidian
+# Raindrop.io Integration & Explorer
 
-Raindrop.io Plugin for Obsidian shows saved Raindrop.io bookmarks inside notes and in a note-aware explorer side pane.
+Raindrop.io Integration & Explorer shows saved Raindrop.io bookmarks inside notes and in a note-aware explorer side pane.
 
 The plugin uses a Raindrop.io access token and the official Raindrop.io REST API. OAuth is planned for a later release.
 
@@ -18,7 +18,7 @@ The plugin uses a Raindrop.io access token and the official Raindrop.io REST API
 ## Setup
 
 1. Create or copy a Raindrop.io access token.
-2. Open **Settings → Community plugins → Raindrop.io Plugin for Obsidian**.
+2. Open **Settings → Community plugins → Raindrop.io Integration & Explorer**.
 3. Paste the token into **Access token**.
 4. Use **Open explorer** from the **Command palette** or ribbon icon.
 5. Optionally add a `raindrop` block to a note for inline results.
