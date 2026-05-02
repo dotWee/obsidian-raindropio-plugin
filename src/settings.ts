@@ -46,7 +46,7 @@ export class RaindropSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Access token")
-			.setDesc("Stored in plugin data and sent only to the bookmark service.")
+			.setDesc("Stored in plugin data and sent only when requesting bookmarks.")
 			.addText((text) => {
 				text.inputEl.type = "password";
 				text
@@ -99,7 +99,7 @@ export class RaindropSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Tag click behavior")
+			.setName("Tag action")
 			.setDesc("Choose whether item tags search notes, filter the explorer, or do nothing.")
 			.addDropdown((dropdown) =>
 				dropdown

@@ -212,7 +212,7 @@ export default class RaindropViewPlugin extends Plugin {
 			| GlobalSearchPluginInstance
 			| undefined;
 
-		// Prefer native global search behavior for tag clicks from any view.
+		// Prefer native global search behavior for tag actions from any view.
 		if (globalSearch?.openGlobalSearch) {
 			globalSearch.openGlobalSearch(searchQuery);
 			return;

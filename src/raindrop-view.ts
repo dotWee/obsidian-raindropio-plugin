@@ -144,7 +144,7 @@ export class RaindropSideView extends ItemView {
 			this.lastFileMtime = null;
 			this.lastFileSize = null;
 			this.setQuery("");
-			this.updateContext("Browsing the configured collection. Open a markdown note to use it as a filter.");
+			this.updateContext("Browsing the configured collection. Open a Markdown note to use it as a filter.");
 			return force || changed;
 		}
 
