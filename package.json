@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-raindropio-plugin",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Browse Raindrop.io links in notes with note-aware and configurable search filters.",
 	"main": "main.js",
 	"type": "module",
