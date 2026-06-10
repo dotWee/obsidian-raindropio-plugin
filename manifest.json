@@ -1,7 +1,7 @@
 {
 	"id": "raindrop-io-plugin",
 	"name": "Raindrop.io Plugin for Obsidian",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"minAppVersion": "1.7.2",
 	"description": "Browse Raindrop.io links in Obsidian with note-aware search filters.",
 	"author": "Lukas '@dotWee' Wolfsteiner <lukas@wolfsteiner-media.de>",
