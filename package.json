@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-raindropio-plugin",
 	"version": "1.0.2",
-	"description": "Browse Raindrop.io links in Obsidian with note-aware search filters.",
+	"description": "Browse Raindrop.io links in notes with note-aware and configurable search filters.",
 	"main": "main.js",
 	"type": "module",
 	"author": "Lukas '@dotWee' Wolfsteiner <lukas@wolfsteiner.media> (http://lukas.wolfsteiner.media/)",

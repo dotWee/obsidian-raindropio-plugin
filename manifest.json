@@ -3,7 +3,7 @@
 	"name": "Raindrop.io Plugin",
 	"version": "1.0.2",
 	"minAppVersion": "1.7.2",
-	"description": "Browse Raindrop.io links in Obsidian with note-aware search filters.",
+	"description": "Browse Raindrop.io links in notes with note-aware and configurable search filters.",
 	"author": "Lukas '@dotWee' Wolfsteiner <lukas@wolfsteiner.media>",
 	"authorUrl": "https://lukas.wolfsteiner.media",
 	"isDesktopOnly": false

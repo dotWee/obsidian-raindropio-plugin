@@ -1,6 +1,6 @@
 # Raindrop.io Plugin for Obsidian
 
-Raindrop.io Plugin for Obsidian shows saved Raindrop.io bookmarks inside notes and in a note-aware explorer side pane.
+Browse Raindrop.io links in notes with note-aware and configurable search filters.
 
 The plugin uses a Raindrop.io access token and the official Raindrop.io REST API. OAuth is planned for a later release.
 
