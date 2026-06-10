@@ -4,7 +4,7 @@
 	"version": "1.0.3",
 	"minAppVersion": "1.7.2",
 	"description": "Browse Raindrop.io links in notes with note-aware and configurable search filters.",
-	"author": "Lukas '@dotWee' Wolfsteiner <lukas@wolfsteiner.media>",
+	"author": "Lukas '@dotWee' Wolfsteiner",
 	"authorUrl": "https://lukas.wolfsteiner.media",
 	"isDesktopOnly": false
 }
