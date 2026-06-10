@@ -19,7 +19,7 @@ interface GlobalSearchPluginInstance {
 }
 
 export default class RaindropViewPlugin extends Plugin {
-	settings: RaindropViewSettings;
+	settings!: RaindropViewSettings;
 	activeMarkdownFile: TFile | null = null;
 	private refreshTimeoutId: number | null = null;
 	private readonly refreshDebounceMs = 200;
