@@ -17,7 +17,7 @@ The plugin uses a Raindrop.io access token and the official Raindrop.io REST API
 ## Features
 
 - **Raindrop.io explorer**: Browse saved bookmarks from the configured collection in a side pane.
-- **Note-aware filtering**: Let the explorer follow the active note by turning note tags and external links into a Raindrop.io search query.
+- **Note-aware filtering**: Let the explorer follow the active note by turning note tags and external links into a Raindrop.io search term.
 - **Manual search**: Search Raindrop.io directly with keywords, `#tag` filters, exact phrases, or operators such as `type:article`, `notag:true`, and `created:2024-01`.
 - **Note blocks**: Render saved Raindrop.io links inline from fenced `raindrop` code blocks.
 - **Configurable tag clicks**: Choose whether tags on rendered Raindrop.io items search Obsidian notes, filter the explorer, or do nothing.
@@ -26,7 +26,7 @@ The plugin uses a Raindrop.io access token and the official Raindrop.io REST API
 ## Setup
 
 1. Create or copy a Raindrop.io access token.
-2. Open **Settings -> Community plugins -> Raindrop.io Plugin for Obsidian**.
+2. Open **Settings → Community plugins**, then select **Raindrop.io**.
 3. Paste the token into **Access token**.
 4. Use **Open explorer** from the command palette or ribbon icon.
 5. Optionally add a `raindrop` block to a note for inline results.
@@ -40,7 +40,7 @@ The side pane opens as **Raindrop.io explorer**. It can browse all saved links f
 Controls:
 
 - **Search**: Runs the query in the search field against Raindrop.io.
-- **Use note filter**: Rebuilds the query from the active markdown note.
+- **Use note filter**: Rebuilds the search term from the active note.
 - **Browse all**: Clears the query and shows the configured collection.
 - **Refresh**: Reloads the current explorer state.
 - **Load more**: Requests the next page of results when more are available.
@@ -51,7 +51,7 @@ When the explorer follows a note, it uses:
 - External `http` and `https` links as exact phrase searches.
 - `match:OR` when multiple note-derived filters are present, so a bookmark can match any note tag or link.
 
-Opening and interacting with the explorer preserves the last active markdown note as context, so the note filter remains stable while you browse.
+Opening and interacting with the explorer preserves the last active note as context, so the note filter remains stable while you browse.
 
 ## Note blocks
 
@@ -71,11 +71,11 @@ Options:
 
 - `collection`: Raindrop.io collection ID. Use `0` for all collections. Defaults to **Default collection**.
 - `tag`: Raindrop.io tag to include in the search. Multi-word tags are quoted automatically, for example `#"coffee beans"`.
-- `search`: Raindrop.io search query. This is passed through to Raindrop.io.
+- `search`: Raindrop.io search term. This is passed through to Raindrop.io.
 - `sort`: Raindrop.io sort value, for example `-created`. Defaults to **Default sort**.
 - `limit`: Number of links to request, clamped between 1 and 100. Defaults to **Default limit**.
 
-You can combine `tag` and `search`; the plugin joins them into one Raindrop.io query.
+You can combine `tag` and `search`; the plugin joins them into one Raindrop.io search term.
 
 ## Settings
 
@@ -112,7 +112,7 @@ The plugin passes search text through to Raindrop.io. Useful examples:
 
 - The plugin only makes network requests to `https://api.raindrop.io`.
 - The access token is stored locally in Obsidian plugin data.
-- Note-aware filtering sends the generated Raindrop.io search query to Raindrop.io. If the active note contains external links, those URLs can be included in the query.
+- Note-aware filtering sends the generated Raindrop.io search term to Raindrop.io. If the active note contains external links, those URLs can be included in the search term.
 - The plugin does not collect analytics or use hidden telemetry.
 
 ## Release files

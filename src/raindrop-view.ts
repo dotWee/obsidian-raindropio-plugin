@@ -144,7 +144,7 @@ export class RaindropSideView extends ItemView {
 			this.lastFileMtime = null;
 			this.lastFileSize = null;
 			this.setQuery("");
-			this.updateContext("Browsing the configured collection. Open a markdown note to use it as a filter.");
+			this.updateContext("Browsing the configured collection. Open a note to use it as a filter.");
 			return force || changed;
 		}
 
@@ -186,7 +186,7 @@ export class RaindropSideView extends ItemView {
 
 		const api = new RaindropApi(this.plugin.settings.accessToken);
 		if (!api.isConfigured) {
-			renderRaindropStatus(this.resultsEl, "Add a Raindrop.io access token in plugin settings.", "info");
+			renderRaindropStatus(this.resultsEl, "Add a Raindrop.io access token under Access token in plugin settings.", "info");
 			this.updateLoadMore(false);
 			return;
 		}

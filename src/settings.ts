@@ -46,7 +46,7 @@ export class RaindropSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Access token")
-			.setDesc("Stored in plugin data and sent only to the bookmark service.")
+			.setDesc("Stored in plugin data and sent only to the Raindrop.io API.")
 			.addText((text) => {
 				text.inputEl.type = "password";
 				text

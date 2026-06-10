@@ -39,7 +39,7 @@ export class RaindropApi {
 
 	async listRaindrops(params: RaindropListParams): Promise<RaindropItem[]> {
 		if (!this.isConfigured) {
-			throw new Error("Missing Raindrop.io access token. Add one in plugin settings.");
+			throw new Error("Missing Raindrop.io access token. Add one under Access token in plugin settings.");
 		}
 
 		const collectionId = Number.isFinite(params.collectionId) ? params.collectionId : 0;

@@ -115,11 +115,20 @@ Follow Obsidian's **Developer Policies** and **Plugin Guidelines**. In particula
 
 ## UX & copy guidelines (for UI text, commands, settings)
 
+Follow the [Obsidian style guide](https://obsidian.md/help/style-guide) for all user-facing copy: commands, settings, notices, explorer UI, error messages, and `README.md`. When adding or editing strings, check that text still matches the guide before merging.
+
 - Prefer sentence case for headings, buttons, and titles.
 - Use clear, action-oriented imperatives in step-by-step copy.
 - Use **bold** to indicate literal UI labels. Prefer "select" for interactions.
 - Use arrow notation for navigation: **Settings → Community plugins**.
 - Keep in-app strings short, consistent, and free of jargon.
+- Use "note" (not "markdown note") for Markdown files in the vault; prefer "active note" over "current note".
+- Prefer "search term" over "search query" in user-facing text.
+- Prefer "maximum" over "max" and "minimum" over "min".
+- Match the exact casing of UI labels when referencing settings (for example, **Access token**).
+- Document settings in-app with `setDesc()`; keep `README.md` aligned with the manifest plugin name and UI labels.
+
+`eslint-plugin-obsidianmd` enforces some of these rules (including sentence case) in TypeScript source files.
 
 ## Performance
 

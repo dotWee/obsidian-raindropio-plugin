@@ -132,7 +132,7 @@ export default class RaindropViewPlugin extends Plugin {
 			const parsed = parseRaindropBlock(source);
 			const api = new RaindropApi(this.settings.accessToken);
 			if (!api.isConfigured) {
-				renderRaindropStatus(container, "Add a Raindrop.io access token in plugin settings.", "info");
+				renderRaindropStatus(container, "Add a Raindrop.io access token under Access token in plugin settings.", "info");
 				return;
 			}
 
