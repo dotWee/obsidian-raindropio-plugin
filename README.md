@@ -1,5 +1,13 @@
 # Raindrop.io Plugin for Obsidian
 
+
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/dotWee/obsidian-raindropio-plugin?style=flat-square)](https://github.com/dotWee/obsidian-raindropio-plugin/releases)
+[![GitHub License](https://img.shields.io/github/license/dotWee/obsidian-raindropio-plugin?style=flat-square)](LICENSE)
+![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json&query=%24%5B%22raindrop-io%22%5D.downloads&logo=obsidian&label=downloads&color=673ab7&link=https%3A%2F%2Fcommunity.obsidian.md%2Fplugins%2Fraindrop-io)
+[![Build & Test](https://github.com/dotWee/obsidian-raindropio-plugin/actions/workflows/lint.yml/badge.svg)](https://github.com/dotWee/obsidian-raindropio-plugin/actions/workflows/lint.yml)
+[![Code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io)
+[![Linting: ESLint](https://img.shields.io/badge/linting-eslint-4B3B6B.svg?style=flat-square)](https://eslint.org)
+
 Browse Raindrop.io links in notes with note-aware and configurable search filters.
 
 The plugin uses a Raindrop.io access token and the official Raindrop.io REST API. OAuth is planned for a later release.
