@@ -24,3 +24,7 @@ updates:
     multi-ecosystem-group: "dependencies"
     labels:
       - "dependencies"
+    groups:
+      actions-deps:
+        patterns:
+          - "*"
