@@ -1,15 +1,23 @@
-import tseslint from 'typescript-eslint';
 import obsidianmd from "eslint-plugin-obsidianmd";
 import globals from "globals";
-import { globalIgnores } from "eslint/config";
+import { globalIgnores, defineConfig } from "eslint/config";
 
-type EslintConfig = Parameters<typeof tseslint.config>[number];
-
-const obsidianRecommendedConfigList = [
-	...((obsidianmd.configs?.recommended ?? []) as Iterable<EslintConfig>),
-];
-
-export default tseslint.config(
+export default defineConfig(
+	globalIgnores([
+		"node_modules",
+		"dist",
+		"esbuild.config.mjs",
+		"eslint.config.js",
+		"eslint.config.mts",
+		"jest.config.cjs",
+		"package.json",
+		"package-lock.json",
+		"pnpm-lock.yaml",
+		"version-bump.mjs",
+		"versions.json",
+		"tsconfig.json",
+		"main.js",
+	]),
 	{
 		languageOptions: {
 			globals: {
@@ -17,10 +25,7 @@ export default tseslint.config(
 			},
 			parserOptions: {
 				projectService: {
-					allowDefaultProject: [
-						'eslint.config.js',
-						'manifest.json'
-					]
+					allowDefaultProject: ['eslint.config.mts', 'manifest.json'],
 				},
 				tsconfigRootDir: import.meta.dirname,
 				extraFileExtensions: ['.json']
@@ -35,19 +40,5 @@ export default tseslint.config(
 			},
 		},
 	},
-	...obsidianRecommendedConfigList,
-	globalIgnores([
-		"node_modules",
-		"dist",
-		"esbuild.config.mjs",
-		"eslint.config.js",
-		"eslint.config.mts",
-		"jest.config.cjs",
-		"package.json",
-		"package-lock.json",
-		"pnpm-lock.yaml",
-		"version-bump.mjs",
-		"versions.json",
-		"main.js",
-	]),
+	...obsidianmd.configs.recommended,
 );
