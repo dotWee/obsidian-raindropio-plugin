@@ -1,4 +1,4 @@
-import { buildRaindropSearchQuery, buildRaindropTagSearch, formatRaindropTagFilter } from "raindrop-search";
+import { buildRaindropSearchQuery, buildRaindropTagSearch, formatRaindropTagFilter } from "../src/raindrop-search";
 
 describe("formatRaindropTagFilter", () => {
 	it("formats simple tags without quotes", () => {

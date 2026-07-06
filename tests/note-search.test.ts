@@ -1,5 +1,5 @@
 import type { CachedMetadata } from "obsidian";
-import { buildNoteRaindropSearch } from "note-search";
+import { buildNoteRaindropSearch } from "../src/note-search";
 
 describe("buildNoteRaindropSearch", () => {
 	it("builds an OR query from note tags and urls", () => {

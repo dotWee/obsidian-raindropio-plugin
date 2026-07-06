@@ -1,5 +1,5 @@
 import type { CachedMetadata } from "obsidian";
-import { getNoteRaindropReferences, getUrlKey } from "note-parser";
+import { getNoteRaindropReferences, getUrlKey } from "../src/note-parser";
 
 describe("getNoteRaindropReferences", () => {
 	it("extracts unique tags and urls from a note", () => {

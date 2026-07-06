@@ -1,4 +1,4 @@
-import { extractFirstRaindropBlock, parseRaindropBlock } from "block-parser";
+import { extractFirstRaindropBlock, parseRaindropBlock } from "../src/block-parser";
 
 describe("parseRaindropBlock", () => {
 	it("parses supported key-value options", () => {
