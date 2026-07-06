@@ -22,6 +22,15 @@
 	background: var(--background-primary);
 }
 
+.raindrop-item-cover {
+	border-radius: var(--radius-s);
+	display: block;
+	margin-bottom: 0.5rem;
+	max-height: 8rem;
+	object-fit: cover;
+	width: 100%;
+}
+
 .raindrop-item-title {
 	display: inline-block;
 	font-weight: var(--font-semibold);
