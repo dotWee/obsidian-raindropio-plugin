@@ -1,5 +1,6 @@
 import { App, PluginSettingTab } from "obsidian";
 import type { SettingDefinitionItem } from "obsidian";
+import { DEFAULT_DISPLAY_FIELDS, type RaindropDisplayFields } from "./renderer";
 import type RaindropViewPlugin from "./main";
 
 export type RaindropTagClickBehavior = "obsidian-search" | "raindrop-search" | "none";
@@ -12,6 +13,7 @@ export interface RaindropViewSettings {
 	defaultLimit: number;
 	defaultSort: string;
 	tagClickBehavior: RaindropTagClickBehavior;
+	displayFields: RaindropDisplayFields;
 }
 
 export const DEFAULT_SETTINGS: RaindropViewSettings = {
@@ -20,7 +22,17 @@ export const DEFAULT_SETTINGS: RaindropViewSettings = {
 	defaultLimit: 20,
 	defaultSort: "-created",
 	tagClickBehavior: "obsidian-search",
+	displayFields: { ...DEFAULT_DISPLAY_FIELDS },
 };
+
+const DISPLAY_FIELD_SETTINGS: { field: keyof RaindropDisplayFields; name: string; desc: string }[] = [
+	{ field: "cover", name: "Show cover", desc: "Show the bookmark cover image on each result." },
+	{ field: "domain", name: "Show domain", desc: "Show the bookmark domain on each result." },
+	{ field: "created", name: "Show created date", desc: "Show the date the bookmark was saved." },
+	{ field: "excerpt", name: "Show excerpt", desc: "Show the bookmark description on each result." },
+	{ field: "tags", name: "Show tags", desc: "Show bookmark tags on each result." },
+	{ field: "collection", name: "Show collection", desc: "Show the collection a bookmark belongs to. Fetches the collection list from Raindrop.io when enabled." },
+];
 
 export function isRaindropTagClickBehavior(value: unknown): value is RaindropTagClickBehavior {
 	return typeof value === "string" && TAG_CLICK_BEHAVIORS.has(value as RaindropTagClickBehavior);
@@ -104,6 +116,23 @@ export class RaindropSettingTab extends PluginSettingTab {
 					defaultValue: DEFAULT_SETTINGS.defaultSort,
 					placeholder: "-created",
 				},
+			},
+			{
+				type: "group",
+				heading: "Result display",
+				items: DISPLAY_FIELD_SETTINGS.map(({ field, name, desc }) => ({
+					name,
+					desc: `${desc} Applies to the explorer and is the default for note blocks.`,
+					render: (setting) => {
+						setting.addToggle((toggle) => {
+							toggle.setValue(this.plugin.settings.displayFields[field]).onChange(async (value) => {
+								this.plugin.settings.displayFields[field] = value;
+								await this.plugin.saveSettings();
+								await this.plugin.refreshRaindropViews(true);
+							});
+						});
+					},
+				})),
 			},
 			{
 				name: "Tag click behavior",

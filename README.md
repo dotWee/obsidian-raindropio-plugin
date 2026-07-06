@@ -85,6 +85,15 @@ You can combine `tag` and `search`; the plugin joins them into one Raindrop.io s
 - **Default sort**: Sort value passed to Raindrop.io, such as `-created`.
 - **Tag click behavior**: Controls clicks on tags shown on Raindrop.io items.
 
+Result display toggles control which fields each result shows. They apply to the explorer and act as the default for note blocks:
+
+- **Show cover**: Bookmark cover image. Off by default.
+- **Show domain**: Bookmark domain, for example `obsidian.md`.
+- **Show created date**: Date the bookmark was saved.
+- **Show excerpt**: Bookmark description.
+- **Show tags**: Bookmark tags.
+- **Show collection**: Collection the bookmark belongs to. Off by default; when enabled, the plugin lazily fetches the collection list from Raindrop.io once and caches it.
+
 Tag click behavior options:
 
 - **Search notes for the tag**: Opens Obsidian search for the clicked tag.

@@ -9,7 +9,7 @@ import {
 import { RaindropApi } from "./raindrop-api";
 import { buildRaindropSearchQuery, formatRaindropTagFilter } from "./raindrop-search";
 import { RaindropSideView } from "./raindrop-view";
-import { renderRaindropItems, renderRaindropStatus } from "./renderer";
+import { DEFAULT_DISPLAY_FIELDS, renderRaindropItems, renderRaindropStatus } from "./renderer";
 import { DEFAULT_SETTINGS, isRaindropTagClickBehavior, RaindropSettingTab, RaindropViewSettings } from "./settings";
 
 interface GlobalSearchPluginInstance {
@@ -84,7 +84,9 @@ export default class RaindropViewPlugin extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, (await this.loadData()) as Partial<RaindropViewSettings>);
+		const loaded = (await this.loadData()) as Partial<RaindropViewSettings> | null;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
+		this.settings.displayFields = { ...DEFAULT_DISPLAY_FIELDS, ...loaded?.displayFields };
 		this.settings.defaultLimit = Math.max(1, Math.min(100, Math.floor(this.settings.defaultLimit)));
 		if (!isRaindropTagClickBehavior(this.settings.tagClickBehavior)) {
 			this.settings.tagClickBehavior = DEFAULT_SETTINGS.tagClickBehavior;
