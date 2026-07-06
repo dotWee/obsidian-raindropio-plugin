@@ -1,4 +1,4 @@
-# Raindrop.io Plugin for Obsidian
+# ![icon.svg](icon.svg) Raindrop.io Plugin for Obsidian
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/dotWee/obsidian-raindropio-plugin?style=flat-square)](https://github.com/dotWee/obsidian-raindropio-plugin/releases)
 [![GitHub License](https://img.shields.io/github/license/dotWee/obsidian-raindropio-plugin?style=flat-square)](LICENSE)
