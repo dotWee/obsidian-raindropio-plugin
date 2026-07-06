@@ -13,6 +13,16 @@
 	"bugs": {
 		"url": "https://github.com/dotWee/obsidian-raindropio-plugin/issues"
 	},
+	"funding": [
+        {
+            "type": "buymeacoffee",
+            "url": "https://buymeacoffee.com/dotwee"
+        },
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/dotWee"
+        }
+    ],
 	"license": "WTFPL",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
