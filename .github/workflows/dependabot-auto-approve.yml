@@ -1,4 +1,4 @@
-name: Dependabot Auto-Approve
+name: Dependabot Auto-Merge
 
 on:
   pull_request_target:
@@ -9,11 +9,11 @@ on:
       - ready_for_review
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
-  approve:
+  approve-and-merge:
     if: github.actor == 'dependabot[bot]' && !github.event.pull_request.draft
     runs-on: ubuntu-latest
 
@@ -24,3 +24,10 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
           gh pr review "$PR_URL" --approve --body "Automatically approved Dependabot dependency update."
+
+      - name: Enable auto-merge for Dependabot pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr merge "$PR_URL" --auto --squash
