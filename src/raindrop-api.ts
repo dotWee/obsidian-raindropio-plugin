@@ -9,6 +9,7 @@ export interface RaindropItem {
 	created?: string;
 	cover?: string;
 	tags?: string[];
+	collection?: { $id: number };
 }
 
 interface RaindropListResponse {
@@ -16,6 +17,22 @@ interface RaindropListResponse {
 	result?: boolean;
 	count?: number;
 }
+
+interface RaindropCollection {
+	_id: number;
+	title?: string;
+}
+
+interface RaindropCollectionListResponse {
+	items?: RaindropCollection[];
+	result?: boolean;
+}
+
+// Raindrop.io system collections are not returned by the collections endpoints.
+const SYSTEM_COLLECTION_TITLES: ReadonlyMap<number, string> = new Map([
+	[-1, "Unsorted"],
+	[-99, "Trash"],
+]);
 
 export interface RaindropListParams {
 	collectionId: number;
@@ -67,6 +84,40 @@ export class RaindropApi {
 		}
 
 		return data.items;
+	}
+
+	async listCollections(): Promise<Map<number, string>> {
+		if (!this.isConfigured) {
+			throw new Error("Missing Raindrop.io access token. Add one under Access token in plugin settings.");
+		}
+
+		const titles = new Map<number, string>(SYSTEM_COLLECTION_TITLES);
+		for (const path of ["/collections", "/collections/childrens"]) {
+			const res = await requestUrl({
+				url: `${this.baseUrl}${path}`,
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${this.token}`,
+				},
+			});
+
+			if (res.status < 200 || res.status >= 300) {
+				throw new Error(`Raindrop.io request failed with status ${res.status}.`);
+			}
+
+			const data = res.json as RaindropCollectionListResponse;
+			if (!data.result || !Array.isArray(data.items)) {
+				throw new Error("Unexpected Raindrop.io API response.");
+			}
+
+			for (const collection of data.items) {
+				if (typeof collection._id === "number" && collection.title) {
+					titles.set(collection._id, collection.title);
+				}
+			}
+		}
+
+		return titles;
 	}
 
 	async listAllRaindrops(params: RaindropListParams, maxItems = 500): Promise<RaindropItem[]> {
