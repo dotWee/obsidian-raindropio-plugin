@@ -74,6 +74,18 @@ Options:
 - `search`: Raindrop.io search term. This is passed through to Raindrop.io.
 - `sort`: Raindrop.io sort value, for example `-created`. Defaults to **Default sort**.
 - `limit`: Number of links to request, clamped between 1 and 100. Defaults to **Default limit**.
+- `show`: Comma-separated fields to show in addition to the **Result display** settings.
+- `hide`: Comma-separated fields to hide, applied after `show`.
+
+Valid field names for `show` and `hide`: `cover`, `domain`, `created`, `excerpt`, `tags`, `collection`. Unknown names produce a warning above the results. For example:
+
+````markdown
+```raindrop
+tag: obsidian
+hide: excerpt, tags
+show: collection
+```
+````
 
 You can combine `tag` and `search`; the plugin joins them into one Raindrop.io search term.
 

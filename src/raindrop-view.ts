@@ -210,8 +210,12 @@ export class RaindropSideView extends ItemView {
 			});
 
 			this.items = reset ? batch : [...this.items, ...batch];
+			const fields = this.plugin.settings.displayFields;
+			const collectionTitles = fields.collection ? await this.plugin.getCollectionTitles(api) : undefined;
 			renderRaindropItems(this.resultsEl, this.items, {
 				title: this.query ? "Filtered Raindrop.io links" : "All Raindrop.io links",
+				fields,
+				collectionTitles,
 				onTagClick: (tag) => {
 					void this.plugin.handleRaindropTagClick(tag, this.getSourceFile()?.path);
 				},

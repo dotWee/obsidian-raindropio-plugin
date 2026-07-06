@@ -9,7 +9,7 @@ import {
 import { RaindropApi } from "./raindrop-api";
 import { buildRaindropSearchQuery, formatRaindropTagFilter } from "./raindrop-search";
 import { RaindropSideView } from "./raindrop-view";
-import { DEFAULT_DISPLAY_FIELDS, renderRaindropItems, renderRaindropStatus } from "./renderer";
+import { DEFAULT_DISPLAY_FIELDS, renderRaindropItems, renderRaindropStatus, resolveRaindropDisplayFields } from "./renderer";
 import { DEFAULT_SETTINGS, isRaindropTagClickBehavior, RaindropSettingTab, RaindropViewSettings } from "./settings";
 
 interface GlobalSearchPluginInstance {
@@ -23,6 +23,8 @@ export default class RaindropViewPlugin extends Plugin {
 	activeMarkdownFile: TFile | null = null;
 	private refreshTimeoutId: number | null = null;
 	private readonly refreshDebounceMs = 200;
+	private collectionTitles: Map<number, string> | null = null;
+	private collectionTitlesRequest: Promise<Map<number, string> | undefined> | null = null;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
@@ -94,7 +96,30 @@ export default class RaindropViewPlugin extends Plugin {
 	}
 
 	async saveSettings(): Promise<void> {
+		// The access token may have changed, so drop cached collection titles.
+		this.collectionTitles = null;
+		this.collectionTitlesRequest = null;
 		await this.saveData(this.settings);
+	}
+
+	async getCollectionTitles(api: RaindropApi): Promise<Map<number, string> | undefined> {
+		if (this.collectionTitles) return this.collectionTitles;
+
+		this.collectionTitlesRequest ??= api
+			.listCollections()
+			.then((titles) => {
+				this.collectionTitles = titles;
+				return titles;
+			})
+			.catch(() => {
+				// Collection titles are optional; results render without them.
+				return undefined;
+			})
+			.finally(() => {
+				this.collectionTitlesRequest = null;
+			});
+
+		return this.collectionTitlesRequest;
 	}
 
 	async openRaindropView(searchQuery?: string, context?: string): Promise<void> {
@@ -138,6 +163,12 @@ export default class RaindropViewPlugin extends Plugin {
 				return;
 			}
 
+			const fields = resolveRaindropDisplayFields(
+				this.settings.displayFields ?? DEFAULT_DISPLAY_FIELDS,
+				parsed.options.showFields,
+				parsed.options.hideFields,
+			);
+
 			const limit = parsed.options.limit ?? this.settings.defaultLimit;
 			const items = await api.listRaindrops({
 				collectionId: parsed.options.collectionId ?? this.settings.defaultCollectionId,
@@ -149,9 +180,13 @@ export default class RaindropViewPlugin extends Plugin {
 				perpage: limit,
 			});
 
+			const collectionTitles = fields.collection ? await this.getCollectionTitles(api) : undefined;
+
 			renderRaindropItems(container, items, {
 				title,
 				warnings: parsed.warnings,
+				fields,
+				collectionTitles,
 				onTagClick: (tag) => {
 					void this.handleRaindropTagClick(tag, sourcePath);
 				},
