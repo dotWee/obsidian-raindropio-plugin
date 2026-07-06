@@ -170,4 +170,4 @@ npm run lint
 
 Copyright (C) 2026 Lukas '@dotWee' Wolfsteiner <lukas@wolfsteiner.media>
 
-Licensed under the _[DO WHAT THE FUCK YOU WANT TO BUT IT'S NOT MY FAULT PUBLIC LICENSE](LICENSE)_.
+Licensed under the _Do What The Fuck You Want To_ public license (see [LICENSE](./LICENSE) file).
