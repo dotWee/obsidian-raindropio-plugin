@@ -1,5 +1,5 @@
-import { App, PluginSettingTab } from "obsidian";
-import type { SettingDefinitionItem } from "obsidian";
+import { App, PluginSettingTab, Setting } from "obsidian";
+import type { SettingControl, SettingDefinition, SettingDefinitionItem, SettingGroup } from "obsidian";
 import { DEFAULT_DISPLAY_FIELDS, type RaindropDisplayFields } from "./renderer";
 import type RaindropViewPlugin from "./main";
 
@@ -151,9 +151,106 @@ export class RaindropSettingTab extends PluginSettingTab {
 		];
 	}
 
-	setControlValue(key: string, value: unknown): void | Promise<void> {
-		if (key === "tagClickBehavior" && !isRaindropTagClickBehavior(value)) return;
-		return super.setControlValue(key, typeof value === "string" ? value.trim() : value);
+	// Implemented without super calls so the tab also works on Obsidian
+	// versions before 1.13.0, where the SettingTab base class does not
+	// provide getControlValue/setControlValue.
+	getControlValue(key: string): unknown {
+		return (this.plugin.settings as unknown as Record<string, unknown>)[key];
 	}
 
+	async setControlValue(key: string, value: unknown): Promise<void> {
+		if (key === "tagClickBehavior" && !isRaindropTagClickBehavior(value)) return;
+		const normalized = typeof value === "string" ? value.trim() : value;
+		(this.plugin.settings as unknown as Record<string, unknown>)[key] = normalized;
+		await this.plugin.saveSettings();
+	}
+
+	/**
+	 * Fallback for Obsidian versions before 1.13.0, which do not call
+	 * getSettingDefinitions(). Renders the same definitions imperatively.
+	 * On 1.13.0+ this method is never called because getSettingDefinitions()
+	 * returns a non-empty array.
+	 */
+	display(): void {
+		const { containerEl } = this;
+		containerEl.empty();
+		this.renderDefinitionItems(this.getSettingDefinitions(), containerEl);
+	}
+
+	private renderDefinitionItems(items: SettingDefinitionItem[], containerEl: HTMLElement): void {
+		for (const item of items) {
+			if ("type" in item && (item.type === "group" || item.type === "list")) {
+				if (item.heading) {
+					new Setting(containerEl).setName(item.heading).setHeading();
+				}
+				this.renderDefinitionItems(item.items ?? [], containerEl);
+				continue;
+			}
+			if ("type" in item && item.type === "page") continue;
+			this.renderDefinition(item as SettingDefinition, containerEl);
+		}
+	}
+
+	private renderDefinition(def: SettingDefinition, containerEl: HTMLElement): void {
+		const setting = new Setting(containerEl).setName(def.name);
+		if (def.desc) setting.setDesc(def.desc);
+		if (def.render) {
+			// Our render callbacks only use the Setting instance; SettingGroup
+			// does not exist at runtime before 1.13.0.
+			def.render(setting, undefined as unknown as SettingGroup);
+			return;
+		}
+		if (def.control) this.renderControl(setting, def.control);
+	}
+
+	private renderControl(setting: Setting, control: SettingControl): void {
+		const rawValue = this.getControlValue(control.key) ?? control.defaultValue;
+		const currentValue =
+			typeof rawValue === "string" || typeof rawValue === "number" || typeof rawValue === "boolean"
+				? rawValue
+				: undefined;
+		switch (control.type) {
+			case "text":
+				setting.addText((text) => {
+					if (control.placeholder) text.setPlaceholder(control.placeholder);
+					text.setValue(currentValue === undefined ? "" : String(currentValue)).onChange(async (value) => {
+						if (control.validate && (await control.validate(value))) return;
+						await this.setControlValue(control.key, value);
+					});
+				});
+				break;
+			case "number":
+				setting.addText((text) => {
+					text.inputEl.type = "number";
+					if (control.min !== undefined) text.inputEl.min = String(control.min);
+					if (control.max !== undefined) text.inputEl.max = String(control.max);
+					if (control.step !== undefined) text.inputEl.step = String(control.step);
+					if (control.placeholder) text.setPlaceholder(control.placeholder);
+					text.setValue(currentValue === undefined ? "" : String(currentValue)).onChange(async (value) => {
+						const parsed = Number(value);
+						if (!Number.isFinite(parsed)) return;
+						if (control.validate && (await control.validate(parsed))) return;
+						await this.setControlValue(control.key, parsed);
+					});
+				});
+				break;
+			case "dropdown":
+				setting.addDropdown((dropdown) => {
+					dropdown.addOptions(control.options);
+					dropdown.setValue(currentValue === undefined ? "" : String(currentValue)).onChange(async (value) => {
+						await this.setControlValue(control.key, value);
+					});
+				});
+				break;
+			case "toggle":
+				setting.addToggle((toggle) => {
+					toggle.setValue(Boolean(currentValue)).onChange(async (value) => {
+						await this.setControlValue(control.key, value);
+					});
+				});
+				break;
+			default:
+				break;
+		}
+	}
 }
