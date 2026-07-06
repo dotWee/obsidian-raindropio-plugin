@@ -1,6 +1,5 @@
 # Raindrop.io Plugin for Obsidian
 
-
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/dotWee/obsidian-raindropio-plugin?style=flat-square)](https://github.com/dotWee/obsidian-raindropio-plugin/releases)
 [![GitHub License](https://img.shields.io/github/license/dotWee/obsidian-raindropio-plugin?style=flat-square)](LICENSE)
 ![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json&query=%24%5B%22raindrop-io%22%5D.downloads&logo=obsidian&label=downloads&color=673ab7&link=https%3A%2F%2Fcommunity.obsidian.md%2Fplugins%2Fraindrop-io)
