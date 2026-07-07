@@ -1,6 +1,7 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import type { SettingControl, SettingDefinition, SettingDefinitionItem, SettingGroup } from "obsidian";
 import { DEFAULT_DISPLAY_FIELDS, type RaindropDisplayFields } from "./renderer";
+import { getSecretComponentConstructor } from "./secrets";
 import type RaindropViewPlugin from "./main";
 
 export type RaindropTagClickBehavior = "obsidian-search" | "raindrop-search" | "none";
@@ -8,7 +9,7 @@ export type RaindropTagClickBehavior = "obsidian-search" | "raindrop-search" | "
 const TAG_CLICK_BEHAVIORS = new Set<RaindropTagClickBehavior>(["obsidian-search", "raindrop-search", "none"]);
 
 export interface RaindropViewSettings {
-	accessToken: string;
+	accessTokenSecretId: string;
 	defaultCollectionId: number;
 	defaultLimit: number;
 	defaultSort: string;
@@ -17,7 +18,7 @@ export interface RaindropViewSettings {
 }
 
 export const DEFAULT_SETTINGS: RaindropViewSettings = {
-	accessToken: "",
+	accessTokenSecretId: "",
 	defaultCollectionId: 0,
 	defaultLimit: 20,
 	defaultSort: "-created",
@@ -54,18 +55,22 @@ export class RaindropSettingTab extends PluginSettingTab {
 				items: [
 					{
 						name: "Access token",
-						desc: "Stored in plugin data and sent only to the Raindrop.io API.",
+						desc: "Select or create an Obsidian secret containing your Raindrop.io access token.",
 						render: (setting) => {
-							setting.addText((text) => {
-								text.inputEl.type = "password";
-								text
-									.setPlaceholder("Access token")
-									.setValue(this.plugin.settings.accessToken)
-									.onChange(async (value) => {
-										this.plugin.settings.accessToken = value.trim();
-										await this.plugin.saveSettings();
-									});
-							});
+							const SecretComponent = getSecretComponentConstructor();
+							if (!SecretComponent) {
+								setting.setDesc("Requires Obsidian 1.11.4 or newer to store secrets.");
+								return;
+							}
+
+							const component = new SecretComponent(this.app, setting.controlEl)
+								.setValue(this.plugin.settings.accessTokenSecretId)
+								.onChange(async (value) => {
+									this.plugin.settings.accessTokenSecretId = value.trim();
+									await this.plugin.saveSettings();
+									await this.plugin.refreshRaindropViews(true);
+								});
+							setting.components.push(component as unknown as (typeof setting.components)[number]);
 						},
 					},
 				],
