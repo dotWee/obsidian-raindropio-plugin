@@ -1,8 +1,8 @@
 {
 	"id": "raindrop-io",
 	"name": "Raindrop.io",
-	"version": "1.0.5",
-	"minAppVersion": "1.7.2",
+	"version": "1.0.6",
+	"minAppVersion": "1.11.4",
 	"description": "Browse Raindrop.io links in notes with note-aware and configurable search filters.",
 	"author": "Lukas '@dotWee' Wolfsteiner",
 	"authorUrl": "https://lukas.wolfsteiner.media",

@@ -184,7 +184,7 @@ export class RaindropSideView extends ItemView {
 	private async loadResults(reset: boolean): Promise<void> {
 		if (!this.resultsEl) return;
 
-		const api = new RaindropApi(this.plugin.settings.accessToken);
+		const api = new RaindropApi(await this.plugin.getAccessToken());
 		if (!api.isConfigured) {
 			renderRaindropStatus(this.resultsEl, "Add a Raindrop.io access token under Access token in plugin settings.", "info");
 			this.updateLoadMore(false);

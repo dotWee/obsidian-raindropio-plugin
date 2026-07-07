@@ -10,7 +10,12 @@ import { RaindropApi } from "./raindrop-api";
 import { buildRaindropSearchQuery, formatRaindropTagFilter } from "./raindrop-search";
 import { RaindropSideView } from "./raindrop-view";
 import { DEFAULT_DISPLAY_FIELDS, renderRaindropItems, renderRaindropStatus, resolveRaindropDisplayFields } from "./renderer";
+import { getAccessTokenSecret, setAccessTokenSecret } from "./secrets";
 import { DEFAULT_SETTINGS, isRaindropTagClickBehavior, RaindropSettingTab, RaindropViewSettings } from "./settings";
+
+interface PersistedRaindropViewSettings extends Partial<RaindropViewSettings> {
+	accessToken?: string;
+}
 
 interface GlobalSearchPluginInstance {
 	openGlobalSearch?: (query?: string) => void;
@@ -86,12 +91,17 @@ export default class RaindropViewPlugin extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		const loaded = (await this.loadData()) as Partial<RaindropViewSettings> | null;
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
-		this.settings.displayFields = { ...DEFAULT_DISPLAY_FIELDS, ...loaded?.displayFields };
+		const loaded = (await this.loadData()) as PersistedRaindropViewSettings | null;
+		const { accessToken: legacyAccessToken, ...persistedSettings } = loaded ?? {};
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, persistedSettings);
+		this.settings.displayFields = { ...DEFAULT_DISPLAY_FIELDS, ...persistedSettings.displayFields };
 		this.settings.defaultLimit = Math.max(1, Math.min(100, Math.floor(this.settings.defaultLimit)));
 		if (!isRaindropTagClickBehavior(this.settings.tagClickBehavior)) {
 			this.settings.tagClickBehavior = DEFAULT_SETTINGS.tagClickBehavior;
+		}
+		if (legacyAccessToken?.trim()) {
+			this.settings.accessTokenSecretId = setAccessTokenSecret(this.app, legacyAccessToken);
+			await this.saveSettings();
 		}
 	}
 
@@ -100,6 +110,10 @@ export default class RaindropViewPlugin extends Plugin {
 		this.collectionTitles = null;
 		this.collectionTitlesRequest = null;
 		await this.saveData(this.settings);
+	}
+
+	async getAccessToken(): Promise<string> {
+		return getAccessTokenSecret(this.app, this.settings.accessTokenSecretId);
 	}
 
 	async getCollectionTitles(api: RaindropApi): Promise<Map<number, string> | undefined> {
@@ -157,7 +171,7 @@ export default class RaindropViewPlugin extends Plugin {
 
 		try {
 			const parsed = parseRaindropBlock(source);
-			const api = new RaindropApi(this.settings.accessToken);
+			const api = new RaindropApi(await this.getAccessToken());
 			if (!api.isConfigured) {
 				renderRaindropStatus(container, "Add a Raindrop.io access token under Access token in plugin settings.", "info");
 				return;

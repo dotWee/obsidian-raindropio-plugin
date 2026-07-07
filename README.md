@@ -24,13 +24,14 @@ The plugin uses a Raindrop.io access token and the official Raindrop.io REST API
 
 ## Setup
 
-1. Create or copy a Raindrop.io access token.
-2. Open **Settings → Community plugins**, then select **Raindrop.io**.
-3. Paste the token into **Access token**.
-4. Use **Open explorer** from the command palette or ribbon icon.
-5. Optionally add a `raindrop` block to a note for inline results.
+1. Install the `Raindrop.io` plugin from the Obsidian Community Plugins repository.
+2. Create or copy a Raindrop.io access token. You can get one by creating new App on [Raindrop.io](https://raindrop.io/settings/integrations) and copying the `Test token`.
+3. Open **Settings → Community plugins**, then select **Raindrop.io**.
+4. Select **Access token**, then create or choose an Obsidian secret that contains the token.
+5. Use **Open explorer** from the command palette or ribbon icon.
+6. Optionally add a `raindrop` block to a note for inline results.
 
-The access token is stored in Obsidian plugin data and sent only to the Raindrop.io REST API.
+The access token is stored in Obsidian secret storage and sent only to the Raindrop.io REST API. If you update from an earlier version, the plugin migrates the saved token into secret storage the next time it loads.
 
 ## Explorer
 
@@ -90,7 +91,7 @@ You can combine `tag` and `search`; the plugin joins them into one Raindrop.io s
 
 ## Settings
 
-- **Access token**: Token used for Raindrop.io API requests.
+- **Access token**: Obsidian secret used for Raindrop.io API requests. Create a new secret or select an existing one that contains your Raindrop.io access token.
 - **Default collection**: Collection ID used by the explorer and note blocks unless a block overrides it. Use `0` for all collections.
 - **Default limit**: Number of links requested per page or block render. Values are clamped between 1 and 100.
 - **Default sort**: Sort value passed to Raindrop.io, such as `-created`.
@@ -131,7 +132,7 @@ The plugin passes search text through to Raindrop.io. Useful examples:
 ## Privacy and network access
 
 - The plugin only makes network requests to `https://api.raindrop.io`.
-- The access token is stored locally in Obsidian plugin data.
+- The access token is stored locally in Obsidian secret storage. Plugin data stores only the selected secret ID.
 - Note-aware filtering sends the generated Raindrop.io search term to Raindrop.io. If the active note contains external links, those URLs can be included in the search term.
 - The plugin does not collect analytics or use hidden telemetry.
 
